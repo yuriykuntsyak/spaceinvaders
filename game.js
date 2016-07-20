@@ -30,6 +30,21 @@
 		// var & obj update
 		update: function(gameSize)
 		{
+			var bodies = this.bodies;
+
+			var notCollidingWithAnything = function(b1)
+			{
+				return bodies.filter
+				(
+					function(b2)
+					{
+						return colliding(b1, b2);
+					}
+				).length == 0;
+			}
+
+			this.bodies = this.bodies.filter(notCollidingWithAnything);
+
 			console.log(this.bodies.length);
 			for(var i = 0; i< this.bodies.length; i++)
 			{
@@ -98,21 +113,21 @@
 			if(this.keyboarder.isDown(this.keyboarder.KEYS.SPACE) && this.bullets < 1)
 			{
 				var bullet = new Bullet(
-					{x:this.position.x+this.size.width/2-3/2, y:this.position.y},
-					{x:0, y:-6});
+					{x:this.position.x+this.size.width/2-3/2, y:this.position.y-7},
+					{x:0, y:-3});
 				this.game.addBody(bullet);
 				this.bullets++;
 			}
 
 			this.timer++;
-			if(this.timer % 3 == 0)
+			if(this.timer % 12 == 0)
 				this.bullets = 0;
 		}
 	}
 
 	var Bullet = function(position, velocity)
 	{
-		this.size = {width:3, height:3};
+		this.size = {width:3, height:6};
 		this.position = position;
 		this.velocity = velocity;
 	}
@@ -137,6 +152,18 @@
 		}
 
 		return invaders;
+	}
+
+	var colliding = function(b1, b2)
+	{
+		return !
+		(
+			b1 == b2 ||
+			b1.position.x + b1.size.width < b2.position.x  || // L R
+			b1.position.x > b2.position.x + b2.size.width  || // R L
+			b1.position.y + b1.size.height < b2.position.y || // T B
+			b1.position.y > b2.position.y + b2.size.height    // B T
+		);
 	}
 
 	var Keyboarder = function()
