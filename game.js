@@ -13,7 +13,7 @@
 		// main game loop
 		var tick = function()
 		{
-			self.update();
+			self.update(gameSize);
 			self.draw(screen, gameSize);
 /* Tells the browser that you wish to perform an animation and requests 
  * that the browser call a specified function to update an animation before the next repaint. 
@@ -28,10 +28,16 @@
 	Game.prototype = 
 	{
 		// var & obj update
-		update: function()
+		update: function(gameSize)
 		{
+			console.log(this.bodies.length);
 			for(var i = 0; i< this.bodies.length; i++)
-				this.bodies[i].update();
+			{
+				if(this.bodies[i].position.y < 0)
+					this.bodies.splice(i, 1);
+				else
+					this.bodies[i].update();
+			}
 		},
 		// canvas rendering
 		draw: function(screen, gameSize)
@@ -54,6 +60,8 @@
 		this.size = {width:16, height:16};
 		this.position = {x: gameSize.x/2-this.size.width/2, y:gameSize.y/2-this.size.height/2};
 		this.keyboarder = new Keyboarder();
+		this.bullets = 0;
+		this.timer = 0;
 	}
 
 	Player.prototype =
@@ -61,19 +69,24 @@
 		update: function()
 		{
 			// Move left
-			if(this.keyboarder.isDown(this.keyboarder.KEYS.LEFT))
-				this.position.x -= 2;
+			if(this.keyboarder.isDown(this.keyboarder.KEYS.LEFT) && this.position.x >= 4)
+				this.position.x -= 4;
 			// Move right
-			if(this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT))
-				this.position.x += 2;
+			if(this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT) && this.position.x <= 800-4-this.size.width)
+				this.position.x += 4;
 			// Shoot
-			if(this.keyboarder.isDown(this.keyboarder.KEYS.SPACE))
+			if(this.keyboarder.isDown(this.keyboarder.KEYS.SPACE) && this.bullets < 1)
 			{
 				var bullet = new Bullet(
 					{x:this.position.x+this.size.width/2-3/2, y:this.position.y},
 					{x:0, y:-6});
 				this.game.addBody(bullet);
+				this.bullets++;
 			}
+			
+			this.timer++;
+			if(this.timer % 3 == 0)
+				this.bullets = 0;
 		}
 	}
 
