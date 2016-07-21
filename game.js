@@ -2,6 +2,10 @@
 {
 	var Game = function(canvasId)
 	{
+		this.score = 0;
+		this.level = 1;
+		this.timer = 0;
+
 		var canvas = document.getElementById(canvasId);
 		var screen = canvas.getContext('2d');
 		var gameSize = {x: canvas.width, y: canvas.height};
@@ -61,6 +65,17 @@
 
 			for(var i = 0; i < this.bodies.length; i++)
 				drawRect(screen, this.bodies[i]);
+
+			screen.font = "30px Arial";
+
+			screen.fillText("SCORE",20,570);
+			screen.fillText(this.score,7*20,570);
+
+			screen.fillText("LEVEL",300,570);
+			screen.fillText(this.level,300+5.5*20,570);
+
+			screen.fillText("LIVES LEFT",570,570);
+			//screen.fillText(this.livesLeft,600+6*20,570);
 		},
 
 		addBody: function(body)
@@ -107,6 +122,8 @@
 		this.keyboarder = new Keyboarder();
 		this.bullets = 0;
 		this.timer = 0;
+		this.livesLeft = 3;
+		this.resurrectTime = 0;
 	}
 
 	Player.prototype =
@@ -133,6 +150,12 @@
 			this.timer++;
 			if(this.timer % 12 == 0)
 				this.bullets = 0;
+
+			if(this.resurrectTime > 0)
+			{
+				this.resurrectTime--;
+				console.log("Res Time: "+this.resurrectTime);
+			}
 		}
 	}
 
@@ -168,26 +191,7 @@
 
 	var colliding = function(b1, b2)
 	{
-		if(
-			b1 instanceof Bullet &&
-			(
-				(b1.origin == "INVADER" && b2 instanceof Invader) ||
-				(b1.origin == "PLAYER" && b2 instanceof Player)
-			)
-		)
-			return false;
-
-		else if 
-		(
-			b2 instanceof Bullet &&
-			(
-				(b2.origin == "INVADER" && b1 instanceof Invader) ||
-				(b2.origin == "PLAYER" && b1 instanceof Player)
-			)
-		)
-				return false;
-
-		return  !
+		var contact = !
 		(
 			b1 == b2 ||
 			b1.position.x + b1.size.width < b2.position.x  || // L R
@@ -195,6 +199,56 @@
 			b1.position.y + b1.size.height < b2.position.y || // T B
 			b1.position.y > b2.position.y + b2.size.height    // B T
 		);
+
+		if(b1 instanceof Bullet)
+		{
+			if(
+			(b1.origin == "INVADER" && b2 instanceof Invader) ||
+			(b1.origin == "PLAYER" && b2 instanceof Player))
+				return false;
+
+			if(b2 instanceof Player && contact)
+			{
+
+				if(b2.resurrectTime < 1)
+				{
+					b2.resurrectTime = 200;
+					b2.livesLeft--;
+					b2.collidedObjects.push(b1);
+					console.log("lives left" + b2.livesLeft);
+					return b2.livesLeft > 0 ? false:true;
+				}
+				else
+					return false;
+				
+			}
+		}
+			
+
+		else if (b2 instanceof Bullet)
+		{
+			if (
+			(b2.origin == "INVADER" && b1 instanceof Invader) ||
+			(b2.origin == "PLAYER" && b1 instanceof Player))
+				return false;
+
+			if(b1 instanceof Player && contact)
+			{
+
+				if(b1.resurrectTime < 1)
+				{
+					b1.resurrectTime = 200;
+					b1.livesLeft--;
+					console.log("lives left" + b1.livesLeft);
+					return b1.livesLeft > 0 ? false:true;
+				}
+				else					
+					return false;
+				
+			}
+		}
+
+		return contact;
 	}
 
 	var loadSound = function(url, callback)
@@ -237,9 +291,18 @@
 		
 		if(body instanceof Player)
 		{
-			var image = document.getElementById("player-img"); // 112x70
-			screen.drawImage(image, body.position.x, body.position.y, 40, 32);
 
+			var image = document.getElementById("player-img"); // 112x70
+			//screen.drawImage(image, body.position.x, body.position.y, 40, 32);
+			screen.fillText(body.livesLeft,600+8*20,570);
+
+			if(body.resurrectTime > 1) 
+			{
+				if(body.resurrectTime%10!==0)
+				screen.drawImage(image, body.position.x, body.position.y, 40, 32);
+			}
+			else
+				screen.drawImage(image, body.position.x, body.position.y, 40, 32);
 		}
 		else if(body instanceof Invader)
 		{
