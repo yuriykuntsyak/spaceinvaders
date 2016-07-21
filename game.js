@@ -48,7 +48,7 @@
 			console.log(this.bodies.length);
 			for(var i = 0; i< this.bodies.length; i++)
 			{
-				if(this.bodies[i].position.y < 0)
+				if(this.bodies[i].position.y < 0 || this.bodies[i].position.y > gameSize.y)
 					this.bodies.splice(i, 1);
 				else
 					this.bodies[i].update();
@@ -86,6 +86,16 @@
 				this.speedX *= -1; // Invert horizontal direction
 			this.position.x += this.speedX; 
 			this.patrolX += this.speedX;
+
+			if(Math.random() < 0.01)
+			{
+				var bullet = new Bullet(
+				{x:this.position.x+this.size.width/2-3/2, y:this.position.y+7},
+				{x:Math.random()-0.5, y:1.5},
+				"INVADER");
+				this.game.addBody(bullet);
+			}
+				
 		}
 	}
 
@@ -114,7 +124,8 @@
 			{
 				var bullet = new Bullet(
 					{x:this.position.x+this.size.width/2-3/2, y:this.position.y-7},
-					{x:0, y:-3});
+					{x:0, y:-3},
+					"PLAYER");
 				this.game.addBody(bullet);
 				this.bullets++;
 			}
@@ -125,11 +136,12 @@
 		}
 	}
 
-	var Bullet = function(position, velocity)
+	var Bullet = function(position, velocity, origin)
 	{
 		this.size = {width:3, height:6};
 		this.position = position;
 		this.velocity = velocity;
+		this.origin = origin;
 	}
 
 	Bullet.prototype =
@@ -156,7 +168,26 @@
 
 	var colliding = function(b1, b2)
 	{
-		return !
+		if(
+			b1 instanceof Bullet &&
+			(
+				(b1.origin == "INVADER" && b2 instanceof Invader) ||
+				(b1.origin == "PLAYER" && b2 instanceof Player)
+			)
+		)
+			return false;
+
+		else if 
+		(
+			b2 instanceof Bullet &&
+			(
+				(b2.origin == "INVADER" && b1 instanceof Invader) ||
+				(b2.origin == "PLAYER" && b1 instanceof Player)
+			)
+		)
+				return false;
+
+		return  !
 		(
 			b1 == b2 ||
 			b1.position.x + b1.size.width < b2.position.x  || // L R
@@ -164,6 +195,19 @@
 			b1.position.y + b1.size.height < b2.position.y || // T B
 			b1.position.y > b2.position.y + b2.size.height    // B T
 		);
+	}
+
+	var loadSound = function(url, callback)
+	{
+		var loaded = function()
+		{
+			callback(sound);
+			sound.addEventListener("canplaythrough", loaded);
+		}
+
+		var sound = new Audio(url);
+		sound.addEventListener("canplaythrough", loaded);
+		sound.load();
 	}
 
 	var Keyboarder = function()
