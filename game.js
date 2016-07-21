@@ -72,7 +72,7 @@
 	var Invader = function(game, position)
 	{
 		this.game = game;
-		this.size = {width:16, height:16};
+		this.size = {width:32, height:32};
 		this.position = position;
 		this.patrolX = 0;
 		this.speedX = 3.5;
@@ -82,7 +82,7 @@
 	{
 		update: function()
 		{
-			if(this.patrolX < 0 || this.patrolX > 800 - 9*30)
+			if(this.patrolX < 0 || this.patrolX > 800 - 8*35)
 				this.speedX *= -1; // Invert horizontal direction
 			this.position.x += this.speedX; 
 			this.patrolX += this.speedX;
@@ -102,7 +102,7 @@
 	var Player = function(game, gameSize)
 	{
 		this.game = game;
-		this.size = {width:16, height:16};
+		this.size = {width:40, height:32};
 		this.position = {x: gameSize.x/2-this.size.width/2, y:gameSize.y/2-this.size.height/2};
 		this.keyboarder = new Keyboarder();
 		this.bullets = 0;
@@ -138,7 +138,7 @@
 
 	var Bullet = function(position, velocity, origin)
 	{
-		this.size = {width:3, height:6};
+		this.size = {width:2, height:6};
 		this.position = position;
 		this.velocity = velocity;
 		this.origin = origin;
@@ -158,8 +158,8 @@
 		var invaders = [];
 		for(var i = 0; i < 24; i++)
 		{
-			var x = 30 + (i % 8) * 30;
-			var y = 30 + (i % 3) * 30;
+			var x = (i % 8) * 35;
+			var y = (i % 3) * 35;
 			invaders.push(new Invader(game, {x:x, y:y}));
 		}
 
@@ -234,7 +234,20 @@
 
 	var drawRect = function(screen, body)
 	{
-		screen.fillRect(body.position.x, body.position.y, body.size.width, body.size.height);
+		
+		if(body instanceof Player)
+		{
+			var image = document.getElementById("player-img"); // 112x70
+			screen.drawImage(image, body.position.x, body.position.y, 40, 32);
+
+		}
+		else if(body instanceof Invader)
+		{
+			var image = document.getElementById("invader1-img"); // 512x512
+			screen.drawImage(image, body.position.x, body.position.y, 32, 32);
+		}
+		else
+			screen.fillRect(body.position.x, body.position.y, body.size.width, body.size.height);
 	}
 
 	var clearCanvas = function(screen, gameSize)
