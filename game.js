@@ -2,9 +2,9 @@
 {
 	var Game = function(canvasId)
 	{
-		this.score = 0;
-		this.level = 1;
-		this.timer = 0;
+		Score = 0;
+		Level = 1;
+		Timer = 0;
 
 		var canvas = document.getElementById(canvasId);
 		var screen = canvas.getContext('2d');
@@ -19,10 +19,10 @@
 		{
 			self.update(gameSize);
 			self.draw(screen, gameSize);
-/* Tells the browser that you wish to perform an animation and requests 
- * that the browser call a specified function to update an animation before the next repaint. 
- * The method takes as an argument a callback to be invoked before the repaint.
-*/			
+			/* Tells the browser that you wish to perform an animation and requests 
+			* that the browser call a specified function to update an animation before the next repaint. 
+			* The method takes as an argument a callback to be invoked before the repaint.
+			*/			
 			requestAnimationFrame(tick); 
 		}
 
@@ -69,10 +69,10 @@
 			screen.font = "30px Arial";
 
 			screen.fillText("SCORE",20,570);
-			screen.fillText(this.score,7*20,570);
+			screen.fillText(Score,7*20,570);
 
 			screen.fillText("LEVEL",300,570);
-			screen.fillText(this.level,300+5.5*20,570);
+			screen.fillText(Level,300+5.5*20,570);
 
 			screen.fillText("LIVES LEFT",570,570);
 			//screen.fillText(this.livesLeft,600+6*20,570);
@@ -222,6 +222,11 @@
 					return false;
 				
 			}
+			else if(b2 instanceof Invader && contact && b1.origin == "PLAYER")
+			{
+				Score++;
+				return true;
+			}
 		}
 			
 
@@ -245,6 +250,11 @@
 				else					
 					return false;
 				
+			}
+			else if(b1 instanceof Invader && contact && b2.origin == "PLAYER")
+			{
+				Score++;
+				return true;
 			}
 		}
 
@@ -293,9 +303,8 @@
 		{
 
 			var image = document.getElementById("player-img"); // 112x70
-			//screen.drawImage(image, body.position.x, body.position.y, 40, 32);
 			screen.fillText(body.livesLeft,600+8*20,570);
-
+			// blink Player while resurrecting
 			if(body.resurrectTime > 1) 
 			{
 				if(body.resurrectTime%10!==0)
