@@ -136,6 +136,13 @@
 			// Move right
 			if(this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT) && this.position.x <= 800-4-this.size.width)
 				this.position.x += 4;
+			// Move up 
+			if(this.keyboarder.isDown(this.keyboarder.KEYS.UP) && this.position.y >= 4)
+				this.position.y -= 4;
+			//Move down
+			if(this.keyboarder.isDown(this.keyboarder.KEYS.DOWN) && this.position.y <= 600-4-this.size.height)
+				this.position.y += 4;
+
 			// Shoot
 			if(this.keyboarder.isDown(this.keyboarder.KEYS.SPACE) && this.bullets < 1)
 			{
@@ -292,7 +299,7 @@
 			return keyState[keyCode];
 		}
 
-		this.KEYS = {LEFT:37, RIGHT:39, SPACE:32};
+		this.KEYS = {LEFT:37, RIGHT:39, SPACE:32, UP:38, DOWN:40};
 
 	}
 
